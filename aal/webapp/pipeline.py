@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from hashlib import sha256
-from typing import Dict, Iterable, List, Sequence
+from typing import Dict, Iterable, List, Sequence, Tuple
 
 SEGMENT_DURATION_SECONDS = 6
 TOTAL_VIDEO_SECONDS = 120
@@ -45,11 +45,31 @@ class RenderSegment:
 
 
 @dataclass(frozen=True)
+class Transition:
+    """Describes a transition between two consecutive segments."""
+
+    from_index: int
+    to_index: int
+    style: str
+    duration_seconds: float
+
+
+@dataclass(frozen=True)
+class MergedVideo:
+    """Represents the final merged video timeline."""
+
+    duration_seconds: int
+    segment_order: Sequence[int]
+    transitions: Sequence[Transition]
+
+
+@dataclass(frozen=True)
 class VideoPlan:
-    """Complete video plan consisting of storyboard and render information."""
+    """Complete video plan consisting of storyboard, render, and merge data."""
 
     storyboard: Sequence[StorySegment]
     render_segments: Sequence[RenderSegment]
+    merged_video: MergedVideo
 
 
 class StoryboardGenerator:
@@ -175,22 +195,87 @@ class VideoPipeline:
     def __init__(self) -> None:
         self._storyboard = StoryboardGenerator()
         self._renderer = ImaginerRenderer()
+        self._assembler = VideoAssembler()
 
     def create_plan(self, prompt: str) -> VideoPlan:
         """Create a video plan for the provided prompt."""
 
         storyboard = self._storyboard.generate(prompt)
         render_segments = self._renderer.render(prompt, storyboard)
-        return VideoPlan(storyboard=storyboard, render_segments=render_segments)
+        merged_video = self._assembler.assemble(render_segments)
+        return VideoPlan(
+            storyboard=storyboard,
+            render_segments=render_segments,
+            merged_video=merged_video,
+        )
+
+
+class VideoAssembler:
+    """Merges rendered segments into a single timeline with smooth transitions."""
+
+    def __init__(
+        self,
+        *,
+        total_duration: int = TOTAL_VIDEO_SECONDS,
+        transition_style: str = "crossfade",
+        transition_duration: float = 0.75,
+    ) -> None:
+        self._total_duration = total_duration
+        self._transition_style = transition_style
+        self._transition_duration = transition_duration
+
+    def assemble(self, segments: Sequence[RenderSegment]) -> MergedVideo:
+        """Create a merged video plan with deterministic transitions.
+
+        Args:
+            segments: Rendered segments ordered by their indices.
+
+        Returns:
+            ``MergedVideo`` describing the final two-minute timeline.
+
+        Raises:
+            ValueError: If ``segments`` are empty or not sequentially indexed.
+        """
+
+        ordered_segments: Tuple[RenderSegment, ...] = tuple(segments)
+        if not ordered_segments:
+            raise ValueError("At least one segment is required to assemble a video.")
+
+        indices = [segment.index for segment in ordered_segments]
+        expected_indices = list(range(len(ordered_segments)))
+        if indices != expected_indices:
+            raise ValueError(
+                "Render segments must be ordered sequentially starting from index 0."
+            )
+
+        transitions: List[Transition] = []
+        for current, nxt in zip(ordered_segments, ordered_segments[1:]):
+            transitions.append(
+                Transition(
+                    from_index=current.index,
+                    to_index=nxt.index,
+                    style=self._transition_style,
+                    duration_seconds=self._transition_duration,
+                )
+            )
+
+        return MergedVideo(
+            duration_seconds=self._total_duration,
+            segment_order=tuple(indices),
+            transitions=tuple(transitions),
+        )
 
 
 __all__ = [
     "ImaginerRenderer",
+    "MergedVideo",
     "RenderSegment",
     "SEGMENT_DURATION_SECONDS",
     "SEGMENTS_PER_VIDEO",
     "StorySegment",
     "StoryboardGenerator",
+    "Transition",
     "TOTAL_VIDEO_SECONDS",
+    "VideoAssembler",
     "VideoPipeline",
 ]
