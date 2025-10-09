@@ -17,8 +17,26 @@ The command launches a WSGI server on `http://localhost:8000` serving the
 single-page interface. Users enter a prompt describing the desired video. The
 backend produces a 2 minute plan comprised of twenty 6-second segments. These
 segments are deterministically merged into a single timeline with crossfade
-transitions to maintain smooth playback. The frontend visualises the plan on a
-`<canvas>` element to simulate video playback.
+transitions to maintain smooth playback.
+
+### Deterministic WebM export
+
+The frontend renders each segment on a `<canvas>` element and then encodes
+those synthetic frames into a WebM file entirely within the browser. When the
+`Download Deterministic WebM` button is pressed the harness:
+
+1. Regenerates every frame deterministically using the same drawing logic as
+   the live preview.
+2. Streams the frames through the `MediaRecorder` API using manual frame pushes
+   when supported so the full two minute video materialises within a few
+   seconds.
+3. Falls back to a paced capture loop when the browser cannot accept manual
+   frames, ensuring every environment still emits a valid WebM even if the
+   export takes the full 120 seconds.
+
+Researchers can inspect the storyboard, render directives, merged timeline
+JSON, or the exported WebM without introducing external encoders or
+nondeterministic assets.
 
 ## Tests
 

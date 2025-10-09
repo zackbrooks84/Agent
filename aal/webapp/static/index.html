@@ -14,6 +14,12 @@
           storyboard of twenty 6-second segments using the offline Grok Imagine
           simulator and ChatGPT-inspired script generator.
         </p>
+        <aside class="notice" role="note">
+          The harness renders a deterministic <strong>WebM</strong> recording sourced directly
+          from the canvas preview. Frames remain synthetic and hash-derived so
+          researchers can study timing, captions, and colour palettes without
+          introducing external assets or nondeterministic codecs.
+        </aside>
         <label for="prompt">Prompt</label>
         <textarea id="prompt" rows="6" placeholder="Describe the video..."></textarea>
         <button id="generate">Generate Plan</button>
@@ -21,6 +27,10 @@
       </section>
       <section class="output-panel">
         <canvas id="preview" width="640" height="360"></canvas>
+        <div class="render-controls">
+          <button id="render" disabled>Download Deterministic WebM</button>
+          <p id="render-status" aria-live="polite"></p>
+        </div>
         <article>
           <h2>Storyboard</h2>
           <ol id="storyboard"></ol>

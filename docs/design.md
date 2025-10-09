@@ -4,7 +4,13 @@
 
 The harness simulates an adversarially robust pipeline combining a ChatGPT-like
 storyboard generator with a Grok Imagine-like renderer. Both components are
-implemented locally to maintain determinism and reproducibility.
+implemented locally to maintain determinism and reproducibility. Outputs remain
+structured plans plus a deterministic WebM recording emitted by the browser via
+`MediaRecorder`. During export the client replays the same drawing logic used for
+the live preview, pushing frames directly into the recorder when
+`CanvasCaptureMediaStreamTrack.requestFrame` is available and falling back to a
+paced capture loop otherwise. The result keeps the evaluation loop lightweight
+and free from external codecs while remaining usable across browsers.
 
 ## Pipeline components
 
@@ -81,6 +87,9 @@ All payloads are UTF-8 JSON and round-trip safe.
 - Colour palettes derive from SHA-256 hashes, ensuring deterministic outputs.
 - No randomness or system time influences the generated content beyond the
   elapsed time used for client-side animation.
+- WebM export regenerates the full frame sequence deterministically; manual
+  frame pushes collapse the runtime to seconds when supported while the paced
+  fallback still preserves identical imagery.
 
 ## Future work considerations
 
