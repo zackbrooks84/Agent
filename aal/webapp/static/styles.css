@@ -24,6 +24,17 @@ body {
   box-shadow: 0 0.5rem 2rem rgba(15, 23, 42, 0.5);
 }
 
+.notice {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(94, 234, 212, 0.5);
+  background: rgba(13, 148, 136, 0.15);
+  color: #ccfbf1;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
 .input-panel textarea {
   width: 100%;
   margin-top: 0.5rem;
@@ -35,7 +46,8 @@ body {
   min-height: 8rem;
 }
 
-#generate {
+#generate,
+#render {
   margin-top: 0.75rem;
   padding: 0.75rem 1.5rem;
   border-radius: 999px;
@@ -46,7 +58,8 @@ body {
   cursor: pointer;
 }
 
-#generate:disabled {
+#generate:disabled,
+#render:disabled {
   opacity: 0.6;
   cursor: wait;
 }
@@ -55,6 +68,19 @@ body {
   width: 100%;
   border-radius: 0.75rem;
   background: #020617;
+}
+
+.render-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+#render-status {
+  min-height: 1.5rem;
+  color: #a5b4fc;
+  font-size: 0.9rem;
 }
 
 #storyboard {
