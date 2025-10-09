@@ -15,9 +15,10 @@ python -m aal.webapp.run
 
 The command launches a WSGI server on `http://localhost:8000` serving the
 single-page interface. Users enter a prompt describing the desired video. The
-backend produces a 2 minute plan comprised of twenty 6-second segments. The
-frontend visualises the plan on a `<canvas>` element to simulate video
-playback.
+backend produces a 2 minute plan comprised of twenty 6-second segments. These
+segments are deterministically merged into a single timeline with crossfade
+transitions to maintain smooth playback. The frontend visualises the plan on a
+`<canvas>` element to simulate video playback.
 
 ## Tests
 
@@ -42,7 +43,8 @@ pytest -q
   tokenisation.
 - Deterministic outputs: identical prompts yield identical plans.
 - Fixed durations: exactly twenty 6-second segments per video ensuring two
-  minutes total runtime.
+  minutes total runtime with deterministic crossfade transitions between
+  segments.
 
 ## License
 

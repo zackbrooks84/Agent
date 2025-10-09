@@ -16,6 +16,10 @@ implemented locally to maintain determinism and reproducibility.
 - `ImaginerRenderer.render(prompt: str, storyboard: Iterable[StorySegment])`
   - Hashes the prompt and segment indices to create synthetic colour palettes.
   - Produces captions that concatenate the storyboard title and description.
+- `VideoAssembler.assemble(segments: Sequence[RenderSegment]) -> MergedVideo`
+  - Validates that the twenty render segments are in sequential order.
+  - Produces a deterministic two-minute timeline with uniform crossfade
+    transitions to merge the segments smoothly.
 
 ## API contract
 
@@ -53,7 +57,19 @@ Response JSON:
       },
       "caption": "Storyboard text"
     }
-  ]
+  ],
+  "merged_video": {
+    "duration_seconds": 120,
+    "segment_order": [0, 1, 2],
+    "transitions": [
+      {
+        "from_index": 0,
+        "to_index": 1,
+        "style": "crossfade",
+        "duration_seconds": 0.75
+      }
+    ]
+  }
 }
 ```
 

@@ -77,6 +77,19 @@ class WebApplication:
                 }
                 for segment in plan.render_segments
             ],
+            "merged_video": {
+                "duration_seconds": plan.merged_video.duration_seconds,
+                "segment_order": list(plan.merged_video.segment_order),
+                "transitions": [
+                    {
+                        "from_index": transition.from_index,
+                        "to_index": transition.to_index,
+                        "style": transition.style,
+                        "duration_seconds": transition.duration_seconds,
+                    }
+                    for transition in plan.merged_video.transitions
+                ],
+            },
         }
         payload_bytes = json.dumps(response).encode("utf-8")
         start_response(
